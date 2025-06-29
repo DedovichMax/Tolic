@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<header class="header">
+    <!-- Верхняя панель -->
+    <div class="header__top-bar">
+        <div class="container">
+            <div class="header__info">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>г. Борисов, ул. 50 лет БССР 17А</span>
+            </div>
+            <nav class="header__links">
+                <a href="Exchange.html"><i class="fas fa-exchange-alt"></i> Обмен и возврат</a>
+                <a href="delivery.html"><i class="fas fa-truck"></i> Доставка и оплата</a>
+                <a href="about.html"><i class="fas fa-info-circle"></i> О магазине</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Основная часть хедера -->
+    <div class="container">
+        <div class="header__main">
+            <a href="index.html" class="header__logo">
+                <img src="images/logo.png" alt="Логотип магазина">
+            </a>
+
+            <div class="header__contacts">
+                <i class="fas fa-phone-alt"></i>
+                <div class="header__phones">
+                    <a href="tel:+375293378090">+375 (29) 337-80-90</a>
+<!--                    <a href="tel:+375337654321">+375 (33) 765-43-21</a>-->
+                </div>
+            </div>
+
+            <div class="header__social">
+                <a href="https://www.instagram.com/fierya_shop?igsh=bnNoMnZlbXJlcTk4" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="viber://chat?number=+375293378090" class="social-link" aria-label="Viber"><i class="fab fa-viber"></i></a>
+                <a href="@maggaret_sh" class="social-link" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+            </div>
+
+            <div class="header__user">
+                <a href="#" class="cart-link" aria-label="Корзина">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-counter">0</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Навигация -->
+        <nav class="header__nav">
+            <div class="catalog-menu">
+                <button class="catalog-toggle">
+                    <i class="fas fa-bars"></i>
+                    <span>Каталог товаров</span>
+                </button>
+                <div class="catalog-dropdown">
+                    <a href="newFile.html?collection=HairCare"><i class="fas fa-spa"></i> Косметика для волос</a>
+                    <a href="newFile.html?collection=FaceCare"><i class="fas fa-smile"></i> Уход для лица</a>
+                    <a href="newFile.html?collection=BodyCare"><i class="fas fa-hand-holding-heart"></i> Уход для тела</a>
+                    <a href="newFile.html?collection=Handmade"><i class="fas fa-hands-helping"></i> Изделия ручной работы</a>
+                    <a href="newFile.html?collection=Styling"><i class="fas fa-wind"></i> Стайлинг</a>
+                    <a href="newFile.html?collection=Makeup"><i class="fas fa-palette"></i> Декоративная косметика</a>
+                    <a href="newFile.html?collection=CombsAndAccessories"><i class="fas fa-cut"></i> Расчёски и аксессуары</a>
+                    <a href="newFile.html?collection=ManicureTools"><i class="fas fa-hand-scissors"></i> Маникюрные принадлежности</a>
+                    <a href="newFile.html?collection=HairColoring"><i class="fas fa-fill-drip"></i> Окрашивание волос</a>
+                    <a href="newFile.html?collection=EyebrowsEyelashes"><i class="fas fa-eye"></i> Брови и ресницы</a>
+                    <a href="newFile.html?collection=MenCosmetics"><i class="fas fa-male"></i> Мужская косметика</a>
+                    <a href="newFile.html?collection=HairRemoval"><i class="fas fa-times-circle"></i> Депиляция</a>
+                    <a href="newFile.html?collection=Sets"><i class="fas fa-gift"></i> Наборы</a>
+                </div>
+            </div>
+
+            <div class="nav-menu">
+                <a href="newFile.html?collection=Discounts"><i class="fas fa-percentage"></i> Скидки</a>
+                <a href="newFile.html?collection=New"><i class="fas fa-bolt"></i> Новинки</a>
+                <a href="newFile.html?collection=Bonuses"><i class="fas fa-gift"></i> Бонусы</a>
+                <a href="newFile.html?collection=Promotions"><i class="fas fa-award"></i> Акции</a>
+            </div>
+
+            <div class="search-form">
+                <form id="searchForm">
+                    <input type="search" id="searchInput" placeholder="Я ищу...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="search-results-modal" id="searchResultsModal">
+    <div class="search-modal-content">
+        <div class="search-modal-header">
+            <h3>Результаты поиска</h3>
+            <button class="close-search-results">&times;</button>
+        </div>
+        <div class="search-results-container" id="searchResultsContainer">
+            <div class="no-results-message">
+                <i class="fas fa-search"></i>
+                <p>Ничего не найдено</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно оформления заказа -->
+<div class="checkout-modal" id="checkoutModal">
+    <div class="checkout-modal-content">
+        <div class="checkout-modal-header">
+            <h3>Оформление заказа</h3>
+            <button class="close-checkout">&times;</button>
+        </div>
+        <form id="checkoutForm" class="checkout-form">
+            <div class="form-group">
+                <label for="customerName">Ваше имя *</label>
+                <input type="text" id="customerName" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customerPhone">Телефон *</label>
+                <input type="tel" id="customerPhone" name="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="deliveryMethod">Способ получения</label>
+                <select id="deliveryMethod" name="deliveryMethod">
+                    <option value="pickup">Самовывоз (г. Борисов, ул. 50 лет БССР 17А)</option>
+                    <option value="delivery">Доставка по Беларуси</option>
+                </select>
+            </div>
+
+            <div class="form-group delivery-address" id="deliveryAddressGroup" style="display: none;">
+                <label for="deliveryAddress">Адрес доставки *</label>
+                <input type="text" id="deliveryAddress" name="deliveryAddress">
+            </div>
+
+            <div class="form-group">
+                <label for="orderComment">Комментарий к заказу</label>
+                <textarea id="orderComment" name="comment" rows="3" placeholder="Ваши пожелания к заказу..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-order-btn">Подтвердить заказ</button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно корзины -->
+<div class="cart-modal" id="cartModal">
+    <div class="cart-modal-content">
+        <div class="cart-modal-header">
+            <h3>Ваша корзина</h3>
+            <button class="close-cart">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Товары будут добавляться сюда динамически -->
+            <div class="empty-cart-message">
+                <i class="fas fa-shopping-cart"></i>
+                <p>Ваша корзина пуста</p>
+            </div>
+        </div>
+        <div class="cart-summary">
+            <div class="cart-total">
+                <span>Итого:</span>
+                <span class="total-amount">0 BYN</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">Оформить заказ</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно товара -->
+<div class="product-modal" id="productModal">
+    <div class="product-modal-content">
+        <button class="close-product">&times;</button>
+        <div class="product-modal-body" id="productModalBody">
+            <!-- Контент будет заполняться динамически -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function initSearchFunctionality() {
+        if (!window.GlobalProducts) {
+            console.error('GlobalProducts is not available');
+            return;
+        }
+
+        const searchForm = document.getElementById('searchForm');
+        if (!searchForm) {
+            console.error('Search form not found');
+            return;
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const searchResultsModal = document.getElementById('searchResultsModal');
+        const searchResultsContainer = document.getElementById('searchResultsContainer');
+        const closeSearchResults = document.querySelector('.close-search-results');
+
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim().toLowerCase();
+
+            if (searchTerm.length < 2) {
+                alert("Введите минимум 2 символа для поиска");
+                return;
+            }
+
+            const allProducts = GlobalProducts.getAllProducts();
+            const results = allProducts.filter(product => {
+                const titleMatch = product.title.toLowerCase().includes(searchTerm);
+                const brandMatch = product.brand && product.brand.toLowerCase().includes(searchTerm);
+                const typeMatch = product.type && product.type.toLowerCase().includes(searchTerm);
+                return titleMatch || brandMatch || typeMatch;
+            });
+
+            displaySearchResults(results);
+            searchResultsModal.style.display = "block";
+            document.body.style.overflow = "hidden";
+        });
+
+        function displaySearchResults(results) {
+            if (!searchResultsContainer) return;
+
+            if (results.length === 0) {
+                searchResultsContainer.innerHTML = `
+                    <div class="no-results-message">
+                        <i class="fas fa-search"></i>
+                        <p>По вашему запросу ничего не найдено</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            results.forEach(product => {
+                const defaultPrice = product.prices ? product.prices[product.defaultVolume || "250"] : "Цена не указана";
+                let category = 'HairCare';
+                if (product.type) {
+                    category = product.type.replace(/\s+/g, '');
+                    if (category === "Combs&Accessories") category = "CombsAndAccessories";
+                    else if (category === "Men'sGrooming") category = "MenCosmetics";
+                }
+
+                html += `
+                    <a href="newFile.html?collection=${category}&product=${product.id}" class="search-result-item">
+                        <img src="${product.image || 'images/default-product.jpg'}" alt="${product.title}">
+                        <div class="search-result-info">
+                            <div class="search-result-title">${product.title}</div>
+                            <div class="search-result-brand">${product.brand || 'Бренд не указан'}</div>
+                            <div class="search-result-price">${defaultPrice} BYN</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                `;
+            });
+
+            searchResultsContainer.innerHTML = html;
+        }
+
+        if (closeSearchResults) {
+            closeSearchResults.addEventListener('click', function() {
+                searchResultsModal.style.display = "none";
+                document.body.style.overflow = "auto";
+            });
+        }
+
+        window.addEventListener('click', function(e) {
+            if (e.target === searchResultsModal) {
+                searchResultsModal.style.display = "none";
+                document.body.style.overflow = "auto";
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape" && searchResultsModal.style.display === "block") {
+                searchResultsModal.style.display = "none";
+                document.body.style.overflow = "auto";
+            }
+        });
+    }
+
+    // Добавляем функцию инициализации поиска в глобальную область видимости
+    window.initSearchFunctionality = initSearchFunctionality;
+</script>
+
+
+<!--<script src="js/search.js"></script>-->
+</body>
+</html>

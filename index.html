@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная | Интернет-магазин электроники</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/cookie-popup.js" defer></script>
+
+</head>
+
+<body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Загружаем header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.body.insertAdjacentHTML('afterbegin', data);
+
+                // Инициализируем функционал после загрузки header'а
+                initAllFunctionality();
+                if (window.initSearchFunctionality) {
+                    initSearchFunctionality();
+                } else {
+                    console.error('Search functionality not loaded');
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    });
+
+    function resetAllAddToCartButtons() {
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        addToCartButtons.forEach(button => {
+            button.innerHTML = '<i class="fas fa-shopping-cart"></i> Добавить в корзину';
+            button.classList.remove('in-cart');
+        });
+    }
+
+    function initAllFunctionality() {
+        // Инициализация мобильного меню (заменяет initMobileMenu)
+        const mobileMenuToggle = document.createElement('div');
+        mobileMenuToggle.className = 'mobile-menu-toggle';
+        mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+        document.querySelector('.header')?.prepend(mobileMenuToggle);
+
+        const headerNav = document.querySelector('.header__nav');
+        if (headerNav) {
+            mobileMenuToggle.addEventListener('click', function () {
+                headerNav.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!headerNav.contains(e.target) && e.target !== mobileMenuToggle && !mobileMenuToggle.contains(e.target)) {
+                    headerNav.classList.remove('active');
+                }
+            });
+        }
+
+        // Остальной код инициализации (как в предыдущем ответе)
+        // Инициализация корзины
+        const cartModal = document.getElementById('cartModal');
+        const checkoutModal = document.getElementById('checkoutModal');
+        const cartLink = document.querySelector('.cart-link');
+        const closeCartBtn = document.querySelector('.close-cart');
+        const closeCheckoutBtn = document.querySelector('.close-checkout');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+
+        if (cartLink) {
+            cartLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                cartModal.classList.add('active');
+                CartManager.renderCartItems();
+            });
+        }
+
+        if (closeCartBtn) {
+            closeCartBtn.addEventListener('click', () => cartModal.classList.remove('active'));
+        }
+
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (CartManager.cart.length === 0) return;
+
+                cartModal.classList.remove('active');
+                checkoutModal.classList.add('active');
+
+                // Рендерим товары в форме заказа
+                const orderItemsContainer = document.getElementById('orderItems');
+                if (orderItemsContainer) {
+                    let itemsHTML = '';
+                    let total = 0;
+
+                    CartManager.cart.forEach(item => {
+                        const itemTotal = item.price * item.quantity;
+                        total += itemTotal;
+                        itemsHTML += `
+                            <div class="order-item">
+                                <span class="order-item-name">${item.name}</span>
+                                <span class="order-item-quantity">${item.quantity} × ${item.price} BYN</span>
+                                <span class="order-item-price">${itemTotal.toFixed(2)} BYN</span>
+                            </div>
+                        `;
+                    });
+
+                    orderItemsContainer.innerHTML = itemsHTML;
+                    document.querySelector('.order-total-amount').textContent = `${total.toFixed(2)} BYN`;
+                }
+            });
+        }
+
+        if (closeCheckoutBtn) {
+            closeCheckoutBtn.addEventListener('click', () => checkoutModal.classList.remove('active'));
+        }
+
+        // Обработчик для метода доставки
+        const deliveryMethod = document.getElementById('deliveryMethod');
+        if (deliveryMethod) {
+            deliveryMethod.addEventListener('change', function () {
+                const showAddress = this.value === 'delivery';
+                document.getElementById('deliveryAddressGroup').style.display = showAddress ? 'block' : 'none';
+                document.getElementById('deliveryAddress').required = showAddress;
+            });
+        }
+
+        // Обработчик формы заказа
+        // Обработчик формы заказа
+        const checkoutForm = document.getElementById('checkoutForm');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const submitBtn = checkoutForm.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+                submitBtn.disabled = true;
+
+                const formData = new FormData(checkoutForm);
+                const formDataObj = Object.fromEntries(formData.entries());
+
+                const orderData = {
+                    customer: formDataObj,
+                    items: CartManager.cart,
+                    total: CartManager.cart.reduce((total, item) => total + (item.price * item.quantity), 0),
+                    date: new Date().toISOString()
+                };
+
+                // Сохраняем заказ в localStorage
+                const orders = JSON.parse(localStorage.getItem('orders')) || [];
+                orders.push(orderData);
+                localStorage.setItem('orders', JSON.stringify(orders));
+
+                // Очищаем корзину
+                CartManager.cart = [];
+                CartManager.saveCart();
+                CartManager.updateCartCounter();
+                checkoutModal.classList.remove('active');
+                checkoutForm.reset();
+
+                // Показываем подтверждение заказа
+                const confirmationModal = document.createElement('div');
+                confirmationModal.className = 'modal order-confirmation-modal';
+                confirmationModal.innerHTML = `
+            <div class="modal-content">
+                <button class="close-modal">&times;</button>
+                <h2>Спасибо за ваш заказ! В ближайшее время с вами свяжется наш менеджер!</h2>
+                <div class="order-summary">
+                    <h3>Детали заказа:</h3>
+                    <div class="order-items-list">
+                        ${orderData.items.map(item => `
+                            <div class="order-item">
+                                <img src="${item.image}" alt="${item.name}" class="order-item-image">
+                                <div class="order-item-info">
+                                    <div class="order-item-name">${item.name}</div>
+                                    <div class="order-item-quantity-price">${item.quantity} × ${item.price} BYN</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-total">
+                        <strong>Итого:</strong> ${orderData.total.toFixed(2)} BYN
+                    </div>
+                    <div class="order-customer-info">
+                        <h3>Информация о доставке:</h3>
+                        <p><strong>Имя:</strong> ${orderData.customer.name}</p>
+                        <p><strong>Телефон:</strong> ${orderData.customer.phone}</p>
+                        <p><strong>Способ доставки:</strong> ${orderData.customer.deliveryMethod === 'delivery' ? 'Доставка' : 'Самовывоз'}</p>
+                        ${orderData.customer.deliveryMethod === 'delivery' && orderData.customer.deliveryAddress ? `
+                            <p><strong>Адрес доставки:</strong> ${orderData.customer.deliveryAddress}</p>
+                        ` : ''}
+                        ${orderData.customer.comment ? `
+                            <p><strong>Комментарий к заказу:</strong> ${orderData.customer.comment}</p>
+                        ` : ''}
+                    </div>
+                </div>
+                <button class="btn close-confirmation">Закрыть</button>
+            </div>
+        `;
+
+                document.body.appendChild(confirmationModal);
+                setTimeout(() => confirmationModal.classList.add('active'), 10);
+
+                // Функция для сброса кнопок и закрытия модального окна
+                function closeModalAndResetButtons() {
+                    // Находим все кнопки "В корзину" и сбрасываем их состояние
+                    const addToCartButtons = document.querySelectorAll('.add-to-cart, .add-to-cart-btn');
+                    addToCartButtons.forEach(button => {
+                        button.innerHTML = '<i class="fas fa-shopping-cart"></i> В корзину';
+                        button.style.backgroundColor = '';
+                        button.classList.remove('in-cart');
+                    });
+
+                    // Закрываем модальное окно
+                    confirmationModal.classList.remove('active');
+                    setTimeout(() => confirmationModal.remove(), 300);
+
+                    // Также вызываем метод CartManager для полного сброса
+                    CartManager.forceUpdateButtons();
+                }
+
+                // Обработчики событий для всех способов закрытия
+                confirmationModal.querySelector('.close-modal').addEventListener('click', closeModalAndResetButtons);
+                confirmationModal.querySelector('.close-confirmation').addEventListener('click', closeModalAndResetButtons);
+
+                // Обработчик клика вне модального окна
+                confirmationModal.addEventListener('click', function (e) {
+                    if (e.target === confirmationModal) {
+                        closeModalAndResetButtons();
+                    }
+                });
+
+                // Обработчик клавиши Escape
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && confirmationModal.classList.contains('active')) {
+                        closeModalAndResetButtons();
+                    }
+                });
+
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            });
+        }
+
+// Закрытие модальных окон при клике вне их
+        document.addEventListener('click', function (e) {
+            const cartModal = document.getElementById('cartModal');
+            const checkoutModal = document.getElementById('checkoutModal');
+
+            if (cartModal && e.target === cartModal) cartModal.classList.remove('active');
+            if (checkoutModal && e.target === checkoutModal) checkoutModal.classList.remove('active');
+        });
+
+// Инициализация счетчика корзины
+        CartManager.updateCartCounter();
+    }
+</script>
+
+<main class="main">
+    <section class="products-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Товар недели</h2>
+                <div class="slider-controls">
+                    <button class="slider-arrow slider-prev" aria-label="Предыдущий слайд">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="slider-arrow slider-next" aria-label="Следующий слайд">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="swiper">
+                <div class="swiper-wrapper" id="productsContainer">
+                    <!-- Товары будут добавляться динамически -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="products-section new-products">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Новинки</h2>
+                <div class="slider-controls">
+                    <button class="slider-arrow new-products-prev" aria-label="Предыдущий слайд">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="slider-arrow new-products-next" aria-label="Следующий слайд">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="swiper new-products-swiper">
+                <div class="swiper-wrapper" id="newProductsContainer">
+                    <!-- Товары-новинки будут добавляться динамически -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">О нашем магазине</h2>
+            </div>
+
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Добро пожаловать в наш магазин профессиональной косметики Фиерия!</h3>
+                    <br>
+                    <p>Мы — команда молодых экспертов, которая постоянно изучает тенденции развития индустрии
+                        профессиональной косметики. В нашем ассортименте вы найдете продукцию ведущих мировых брендов, в
+                        которых мы тщательно отбираем каждую позицию, чтобы обеспечить высокое качество и эффективность
+                        средств.</p>
+                    <br>
+
+
+                    <!--                    <h3>Наши преимущества:</h3>-->
+                    <!--                    <ul class="advantages-list">-->
+                    <!--                        <li><i class="fas fa-check-circle"></i> Только оригинальная продукция с официальной гарантией-->
+                    <!--                        </li>-->
+                    <!--                        <li><i class="fas fa-check-circle"></i> Профессиональные консультации по всем товарам</li>-->
+                    <!--                        <li><i class="fas fa-check-circle"></i> Гибкая система скидок и бонусная программа</li>-->
+                    <!--                        <li><i class="fas fa-check-circle"></i> Быстрая доставка по всему Борисову и области</li>-->
+                    <!--                        <li><i class="fas fa-check-circle"></i> Собственный сервисный центр</li>-->
+                    <!--                    </ul>-->
+
+                    <!--                    <h3>Гарантия качества</h3>-->
+                    <p>Для нас очень важно ваше доверие и комфорт. Именно поэтому наши консультанты всегда готовы помочь
+                        вам выбрать подходящие средства, учитывая ваши личные предпочтения. Мы постоянно работаем над
+                        уровнем и качеством консультации, ведь это неотъемлемая часть нашей работы. Наша главная задача
+                        и цель: сделать каждого из Вас чуточку счастливее! </p>
+                    <br>
+                    <p>Будьте красивы и уверены в себе вместе с нами!</p>
+                    <div class="about-contacts">
+                        <h3>Контакты</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Адрес:</strong> г. Борисов, ул. 50 лет БССР
+                            17А, 1 этаж (главный вход)
+                        </p>
+                        <p><i class="fas fa-clock"></i> <strong>Часы работы:</strong> Часы работы: ежедневно 10:00 -
+                            19:00</p>
+                        <p><i class="fas fa-phone-alt"></i> <strong>Телефоны:</strong> +375 (29) 337-80-90</p>
+                        <p>
+                            <i class="fas fa-envelope"></i> <strong>Адрес эл.почты:</strong> <a
+                                href="mailto:oooritoli@mail.ru">oooritoli@mail.ru</a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="about-image">
+                    <img src="images/R.JPG" alt="Интерьер нашего магазина">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="map-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Мы на карте</h2>
+            </div>
+
+            <div class="map-wrapper">
+                <div class="yandex-map-container">
+                    <iframe class="yandex-map-iframe"
+                            src="https://yandex.by/map-widget/v1/?ll=28.483910%2C54.214581&mode=search&ol=geo&ouri=ymapsbm1%3A%2F%2Fgeo%3Fdata%3DCgoyNDkwMTg4Njg4EmjQkdC10LvQsNGA0YPRgdGMLCDQnNGW0L3RgdC60LDRjyDQstC-0LHQu9Cw0YHRhtGMLCDQkdCw0YDRi9GB0LDRniwg0LLRg9C70ZbRhtCwIDUwINCz0L7QtCDQkdCh0KHQoCwgMTfQkCIKDZbe40EVr9tYQg%2C%2C&z=16.43"
+                            frameborder="0"
+                            allowfullscreen="true">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Футер -->
+<div id="footer-container"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Загружаем footer.html и вставляем его в элемент с id="footer-container"
+        fetch('footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-container').innerHTML = data;
+            })
+            .catch(error => console.error('Error loading footer:', error));
+    });
+</script>
+
+
+<div class="search-results-modal" id="searchResultsModal">
+    <div class="search-modal-content">
+        <div class="search-modal-header">
+            <h3>Результаты поиска</h3>
+            <button class="close-search-results">&times;</button>
+        </div>
+        <div class="search-results-container" id="searchResultsContainer">
+            <!-- Результаты будут добавляться сюда динамически -->
+            <div class="no-results-message">
+                <i class="fas fa-search"></i>
+                <p>Ничего не найдено</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+<script src="js/cookie-popup.js" defer></script>
+<script src="js/search.js" defer></script>
+<script src="js/script.js" defer></script>
+
+</body>
+</html>
